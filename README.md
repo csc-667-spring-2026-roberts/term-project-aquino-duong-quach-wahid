@@ -1,4 +1,4 @@
-# Team Name — Game Name
+# Team Name — Uno
 
 CSC 667 Term Project — Spring 2026
 
