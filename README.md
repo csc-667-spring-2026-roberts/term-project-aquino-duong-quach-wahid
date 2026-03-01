@@ -9,7 +9,7 @@ CSC 667 Term Project — Spring 2026
 | Mahvesh Wahid | @mahvwahid | mwahid@sfsu.edu |
 | Christopher Quach | @rexchris2 | cquach@sfsu.edu |
 | Adrian Aquino | @ianaqui | aaquino5@sfsu.edu |
-| Member 4 | @username | email@sfsu.edu |
+| Tyler Duong | @tduong64 | tduong8@sfsu.edu |
 
 ## Setup
 
