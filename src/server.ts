@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import homeRoutes from "./routes/home.js";
+import dbRoutes from "./routes/db.js";
 import loggingMiddleware from "./middleware/logging.js";
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use(loggingMiddleware);
 
+app.use("/db", dbRoutes);
 app.use("/", homeRoutes);
 
 app.listen(PORT, () => {

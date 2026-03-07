@@ -4,6 +4,10 @@ import db from "../db/connection.js";
 
 const router = Router();
 
+router.get("/check", async (_request, response) => {
+  response.json(await db.one("SELECT 1 AS ok"));
+});
+
 router.get("/:id", async (request, response) => {
   const { id } = request.params;
 
