@@ -27,7 +27,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@types/dotenv": "^6.1.1",
     "@types/node": "^20.11.0",
+    "@types/pg-promise": "^0.0.28",
     "eslint": "^9.0.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.2.0",
