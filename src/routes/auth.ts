@@ -1,5 +1,6 @@
 // Registration route (POST /auth/register) — validate input, hash password with bcrypt, insert user, set session
 // Login route (POST /auth/login) — look up user, compare password with bcrypt, set session on success
+// Logout route (POST /auth/logout) — destroy session
 import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import Users from "../db/users.js";
@@ -75,6 +76,20 @@ router.post("/login", async (request: Request, response: Response) => {
   } catch {
     response.status(401).json({ error: "Invalid email or password" });
   }
+});
+
+// destroy session
+router.post("/logout", (request: Request, response: Response) => {
+  request.session.destroy((error) => {
+    if (error) {
+      console.error(error);
+      response.status(500).json({ error: "Logout failed" });
+      return;
+    }
+
+    response.clearCookie("connect.sid");
+    response.json({ message: "Logged out" });
+  });
 });
 
 export default router;
