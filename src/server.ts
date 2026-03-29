@@ -11,6 +11,7 @@ import dbRoutes from "./routes/db.js";
 import loggingMiddleware from "./middleware/logging.js";
 import testRoutes from "./routes/test.js";
 import authRoutes from "./routes/auth.js";
+import lobbyRoutes from "./routes/lobby.js";
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 app.use(loggingMiddleware);
 
 app.use("/auth", authRoutes);
+app.use("/lobby", lobbyRoutes);
 app.use("/db", dbRoutes);
 app.use("/", homeRoutes);
 app.use("/test", testRoutes);
