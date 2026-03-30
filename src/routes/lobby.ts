@@ -7,7 +7,7 @@ const router = Router();
 router.get("/", requireAuth, (request: Request, response: Response) => {
   const { user } = request.session;
 
-  response.json({ user });
+  response.render("lobby", { user });
 });
 
 export default router;

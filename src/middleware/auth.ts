@@ -5,6 +5,6 @@ export function requireAuth(request: Request, response: Response, next: NextFunc
   if (request.session.user?.id) {
     next();
   } else {
-    response.status(401).json({ error: "Unauthorized" });
+    response.redirect("/auth/login");
   }
 }

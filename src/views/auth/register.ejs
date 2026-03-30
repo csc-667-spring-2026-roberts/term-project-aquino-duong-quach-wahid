@@ -1,0 +1,23 @@
+<%- include("../partials/head", { title: "Register" }) %>
+<%- include("../partials/header", {
+  user: typeof user !== "undefined" ? user : null,
+  error: typeof error !== "undefined" ? error : null
+}) %>
+
+<h2>Register</h2>
+
+<form action="/auth/register" method="POST">
+  <div>
+    <label for="email">Email:</label>
+    <input type="email" name="email" id="email" required>
+  </div>
+  <div>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required>
+  </div>
+  <button type="submit">Register</button>
+</form>
+
+<p>Already have an account? <a href="/auth/login">Login</a></p>
+
+<%- include("../partials/footer") %>

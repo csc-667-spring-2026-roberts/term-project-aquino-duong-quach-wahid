@@ -2,19 +2,20 @@
 import db from "./connection.js";
 import { User, DbUser } from "../types/user.js";
 
+// const existing = async (email: string): Promise<boolean> => {
+//   try {
+//     await db.none("SELECT id FROM users WHERE email = $1", [email]);
+//     return false;
+//   } catch {
+//     return true;
+//   }
+// };
 const existing = async (email: string): Promise<boolean> => {
-  try {
-    await db.none("SELECT id FROM users WHERE email = $1", [email]);
-    return false;
-  } catch {
-    return true;
-  }
-};
+  const user = await db.oneOrNone<{ id: number }>("SELECT id FROM users WHERE email = $1", [email]);
 
-const create = async (
-  email: string,
-  passwordHash: string,
-): Promise<User> =>
+  return user !== null;
+};
+const create = async (email: string, passwordHash: string): Promise<User> =>
   await db.one<User>(
     "INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email",
     [email, passwordHash],

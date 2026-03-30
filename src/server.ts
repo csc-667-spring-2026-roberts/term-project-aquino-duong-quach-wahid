@@ -12,7 +12,6 @@ import loggingMiddleware from "./middleware/logging.js";
 import testRoutes from "./routes/test.js";
 import authRoutes from "./routes/auth.js";
 import lobbyRoutes from "./routes/lobby.js";
-
 dotenv.config();
 
 const app = express();
@@ -22,6 +21,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // set session
 app.use(

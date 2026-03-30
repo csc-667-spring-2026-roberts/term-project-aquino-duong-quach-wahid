@@ -9,24 +9,28 @@ const router = Router();
 
 const SALT_ROUNDS = 10;
 
+router.get("/register", (_request, response) => {
+  response.render("auth/register");
+});
+
 // validate input, hash password with bcrypt, insert user, set session
 router.post("/register", async (request: Request, response: Response) => {
   const { email, password } = request.body as { email: string; password: string };
 
   // validate input
   if (!email || !password) {
-    response.status(400).json({ error: "Email and password required" });
+    response.render("auth/register", { error: "Email and password required" });
     return;
   }
 
   if (password.length < 8) {
-    response.status(400).json({ error: "Password must be at least 8 characters" });
+    response.render("auth/register", { error: "Password must be at least 8 characters" });
     return;
   }
 
   try {
     if (await Users.existing(email)) {
-      response.status(409).json({ error: "Email is already registered" });
+      response.render("auth/register", { error: "Email is already registered" });
       return;
     }
 
@@ -39,11 +43,15 @@ router.post("/register", async (request: Request, response: Response) => {
     // set session
     request.session.user = { id: user.id, email: user.email };
 
-    response.status(201).json({ ...user });
+    response.redirect("/lobby");
   } catch (error) {
     console.error(error);
-    response.status(500).json({ error: "Registration failed" });
+    response.status(500).render("auth/register", { error: "Registration failed" });
   }
+});
+
+router.get("/login", (_request, response) => {
+  response.render("auth/login");
 });
 
 // look up user, compare password with bcrypt, set session on success
@@ -51,7 +59,7 @@ router.post("/login", async (request: Request, response: Response) => {
   const { email, password } = request.body as { email: string; password: string };
 
   if (!email || !password) {
-    response.status(400).json({ error: "Email and password required" });
+    response.render("auth/login", { error: "Email and password required" });
     return;
   }
 
@@ -63,7 +71,7 @@ router.post("/login", async (request: Request, response: Response) => {
     const match = await bcrypt.compare(password, dbUser.password_hash);
 
     if (!match) {
-      response.status(401).json({ error: "Invalid email or password" });
+      response.render("auth/login", { error: "Invalid email or password" });
       return;
     }
 
@@ -71,10 +79,9 @@ router.post("/login", async (request: Request, response: Response) => {
 
     // set session on success
     request.session.user = user;
-
-    response.json({ ...user });
+    response.redirect("/lobby");
   } catch {
-    response.status(401).json({ error: "Invalid email or password" });
+    response.render("auth/login", { error: "Invalid email or password" });
   }
 });
 
@@ -83,12 +90,12 @@ router.post("/logout", (request: Request, response: Response) => {
   request.session.destroy((error) => {
     if (error) {
       console.error(error);
-      response.status(500).json({ error: "Logout failed" });
+      response.status(500).render("auth/login", { error: "Logout failed" });
       return;
     }
 
     response.clearCookie("connect.sid");
-    response.json({ message: "Logged out" });
+    response.redirect("/auth/login");
   });
 });
 

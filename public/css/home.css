@@ -1,3 +1,39 @@
 body {
-  background-color: blue;
+  font-family: sans-serif;
+  max-width:900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background-color: rgb(145, 145, 212);
+}
+
+form div{
+  margin-bottom:  1rem;
+}
+
+label{
+  display:block;
+  margin-bottom: 0.25rem;
+}
+
+input{
+  width: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+button{
+  padding:0.5rem 1rem;
+  cursor: pointer;
+}
+
+.error{
+  color:red;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid red;
+  border-radius: 4px;
+}
+
+nav form {
+  display: inline;
 }

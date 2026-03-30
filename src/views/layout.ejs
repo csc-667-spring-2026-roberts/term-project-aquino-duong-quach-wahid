@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=="undefined" ? title : "UNO" %>
+    </title>
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <% if(typeof user !=="undefined" && user) { %>
+            <span>Welcome, <%= user.email %></span>
+            <form action="/auth/logout" method="POST">
+                <button type="submit">Logout</button>
+            </form>
+            <% } else { %>
+                <a href="/auth/login">Login</a>
+                <a href="/auth/register">Register</a>
+                <% } %>
+    </nav>
+
+    <main>
+        <% if(typeof error !=="undefined" && error) { %>
+            <div class="error">
+                <%= error %>
+            </div>
+            <% } %>
+                <%- body %>
+    </main>
+
+</body>
+
+</html>
