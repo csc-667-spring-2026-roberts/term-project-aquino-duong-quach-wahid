@@ -1,7 +1,7 @@
 <nav>
   <a href="/">Home</a>
   <% if (typeof user !== "undefined" && user) { %>
-    <span>Welcome, <%= user.email %></span>
+    <span>Signed in as <%= user.email %></span>
     <form action="/auth/logout" method="POST">
       <button type="submit">Logout</button>
     </form>
