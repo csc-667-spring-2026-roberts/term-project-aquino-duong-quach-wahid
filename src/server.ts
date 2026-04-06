@@ -5,6 +5,9 @@ import dotenv from "dotenv";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 
+import livereload from "livereload";
+import connectLiveReload from "connect-livereload";
+
 import db from "./db/connection.js";
 import homeRoutes from "./routes/home.js";
 import dbRoutes from "./routes/db.js";
@@ -12,6 +15,7 @@ import loggingMiddleware from "./middleware/logging.js";
 import testRoutes from "./routes/test.js";
 import authRoutes from "./routes/auth.js";
 import lobbyRoutes from "./routes/lobby.js";
+
 dotenv.config();
 
 const app = express();
@@ -25,7 +29,6 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// set session
 app.use(
   session({
     store: new (connectPgSimple(session))({
@@ -47,12 +50,26 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use(loggingMiddleware);
 
+const liveReloadServer = livereload.createServer();
+
+liveReloadServer.watch(path.join(__dirname, "..", "public"));
+liveReloadServer.watch(path.join(__dirname, "views"));
+
+app.use(connectLiveReload());
+
 app.use("/auth", authRoutes);
 app.use("/lobby", lobbyRoutes);
 app.use("/db", dbRoutes);
 app.use("/", homeRoutes);
 app.use("/test", testRoutes);
 
+
 app.listen(PORT, () => {
   console.log(`Server started on port ${String(PORT)} at ${new Date().toLocaleTimeString()}`);
+});
+
+liveReloadServer.server.once("connection", () => {
+  setTimeout(() => {
+    liveReloadServer.refresh("/");
+  }, 100);
 });

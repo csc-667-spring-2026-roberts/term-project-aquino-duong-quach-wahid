@@ -2,6 +2,17 @@
 <%- include("partials/header", { user }) %>
 
 <h2>Lobby</h2>
+
 <p>You are logged in as <%= user.email %>.</p>
 
+<button id="loadData">Load Lobby Events</button>
 
+<div id="dataContainer"></div>
+
+<template id="dataTemplate">
+  <p class="message"></p>
+</template>
+
+<script defer src="/js/main.js"></script>
+
+<%- include("partials/footer") %>

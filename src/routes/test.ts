@@ -25,4 +25,12 @@ router.post("/", async (request, response) => {
   response.json(records);
 });
 
+router.get("/data", async (_req, res) => {
+  res.json([
+    { message: "Player 1 joined" },
+    { message: "Player 2 joined" },
+    { message: "Game ready" },
+  ]);
+});
+
 export default router;
