@@ -15,6 +15,7 @@ import loggingMiddleware from "./middleware/logging.js";
 import testRoutes from "./routes/test.js";
 import authRoutes from "./routes/auth.js";
 import lobbyRoutes from "./routes/lobby.js";
+import sseRoutes from "./routes/sse.js";
 
 dotenv.config();
 
@@ -62,6 +63,7 @@ app.use("/lobby", lobbyRoutes);
 app.use("/db", dbRoutes);
 app.use("/", homeRoutes);
 app.use("/test", testRoutes);
+app.use("/api/sse", sseRoutes);
 
 
 app.listen(PORT, () => {
