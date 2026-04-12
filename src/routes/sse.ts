@@ -13,6 +13,14 @@ function sendEvent(res: Response, event: string, data: unknown): void {
 
 const clients = new Map<string, SSEClient>();
 
+function broadcast(room: string, event: string, data: unknown): void {
+  for (const client of clients.values()) {
+    if (client.room === room) {
+      sendEvent(client.res, event, data);
+    }
+  }
+}
+
 const router = Router();
 
 // GET /api/sse
@@ -54,6 +62,25 @@ router.get("/", (req: Request, res: Response) => {
     clearInterval(heartbeat);
     clients.delete(clientId);
     res.end();
+  });
+});
+
+router.post("/broadcast", (req: Request, res: Response) => {
+  const room = typeof req.body.room === "string" ? req.body.room : "lobby";
+  const message = typeof req.body.message === "string" ? req.body.message : "New update";
+
+  const payload = {
+    room,
+    message,
+    timestamp: new Date().toISOString(),
+  };
+
+  broadcast(room, "state:update", payload);
+
+  res.status(200).json({
+    ok: true,
+    room,
+    payload,
   });
 });
 
