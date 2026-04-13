@@ -84,5 +84,13 @@ router.post("/broadcast", (req: Request, res: Response) => {
   });
 });
 
-export { broadcast };
+// broadcast unnamed event
+const broadcastAll = (data: unknown): void => {
+  const message = `data: ${JSON.stringify(data)}\n\n`;
+  for (const [, { res }] of clients) {
+    res.write(message);
+  }
+};
+
+export { broadcast, broadcastAll };
 export default router;

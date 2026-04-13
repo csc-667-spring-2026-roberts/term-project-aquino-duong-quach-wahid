@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { broadcast } from "./sse.js";
+import { broadcastAll } from "./sse.js";
 
 const router = Router();
 
@@ -8,7 +8,7 @@ const games: { id: number; name: string }[] = [];
 let nextId = 1;
 
 // get all games
-router.get("/", (req: Request, res: Response) => {
+router.get("/", (_req: Request, res: Response) => {
   res.json(games);
 });
 
@@ -19,7 +19,7 @@ router.post("/", (req: Request, res: Response) => {
   games.push(game);
 
   // broadcast to lobby
-  broadcast("lobby", "games:update", games);
+  broadcastAll(games);
 
   res.status(201).json(game);
 });
