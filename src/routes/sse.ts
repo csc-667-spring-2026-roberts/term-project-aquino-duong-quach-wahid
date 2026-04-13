@@ -84,4 +84,5 @@ router.post("/broadcast", (req: Request, res: Response) => {
   });
 });
 
+export { broadcast };
 export default router;

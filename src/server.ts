@@ -16,6 +16,7 @@ import testRoutes from "./routes/test.js";
 import authRoutes from "./routes/auth.js";
 import lobbyRoutes from "./routes/lobby.js";
 import sseRoutes from "./routes/sse.js";
+import gamesRoutes from "./routes/games.js";
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use("/db", dbRoutes);
 app.use("/", homeRoutes);
 app.use("/test", testRoutes);
 app.use("/api/sse", sseRoutes);
+app.use("/api/games", gamesRoutes);
 
 
 app.listen(PORT, () => {
