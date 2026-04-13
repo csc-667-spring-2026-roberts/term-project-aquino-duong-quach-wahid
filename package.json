@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "build:client": "esbuild src/client/main.ts --bundle --outfile=public/js/main.js",
-    "watch:client": "esbuild src/client/main.ts --bundle --outfile=public/js/main.js --watch",
+    "build:client": "esbuild src/client/main.ts --bundle --outfile=public/js/main.js && esbuild src/client/lobby.ts --bundle --outfile=public/js/lobby.js",
+    "watch:client": "esbuild src/client/main.ts --bundle --outfile=public/js/main.js --watch & esbuild src/client/lobby.ts --bundle --outfile=public/js/lobby.js --watch",
     "start": "node dist/server.js",
     "dev": "concurrently \"tsx watch src/server.ts\" \"npm run watch:client\"",
     "lint": "eslint src/",
