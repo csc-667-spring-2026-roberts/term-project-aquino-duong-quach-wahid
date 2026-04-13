@@ -5,12 +5,15 @@
 
 <p>You are logged in as <%= user.email %>.</p>
 
-<button id="loadData">Load Lobby Events</button>
+<button id="create-game">Create Game</button>
 
-<div id="dataContainer"></div>
+<div id="games-list"></div>
 
-<template id="dataTemplate">
-  <p class="message"></p>
+<template id="game-card-template">
+  <div>
+    <span data-game-id></span>
+    <span data-game-name></span>
+  </div>
 </template>
 
 <script defer src="/js/lobby.js"></script>
