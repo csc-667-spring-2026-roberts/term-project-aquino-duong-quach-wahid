@@ -4,19 +4,36 @@
   error: typeof error !== "undefined" ? error : null
 }) %>
 
-<h2>Login</h2>
+<section class="auth-scene" aria-labelledby="login-title">
+  <div class="auth-copy">
+    <p class="eyebrow">Your turn</p>
+    <h1 id="login-title">Jump Back In</h1>
+    <p>Grab your hand, read the table, and make the next play count.</p>
 
-<form action="/auth/login" method="POST">
-  <div>
-    <label for="email">Email:</label>
-    <input type="email" name="email" id="email" required>
+    <div class="mini-card-row" aria-hidden="true">
+      <span class="mini-uno-card mini-red">UNO</span>
+      <span class="mini-uno-card mini-yellow">+2</span>
+      <span class="mini-uno-card mini-blue">Skip</span>
+    </div>
   </div>
-  <div>
-    <label for="password">Password:</label>
-    <input type="password" name="password" id="password" required>
-  </div>
-  <button type="submit">Login</button>
-</form>
 
-<p>Don't have an account? <a href="/auth/register">Register</a></p>
+  <section class="auth-panel" aria-label="Login form">
+    <p class="auth-kicker">Welcome back</p>
+    <h2>Login</h2>
+
+    <form class="auth-form" action="/auth/login" method="POST">
+      <div class="field-group">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" autocomplete="email" required>
+      </div>
+      <div class="field-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" autocomplete="current-password" required>
+      </div>
+      <button class="button" type="submit">Login</button>
+    </form>
+
+    <p class="auth-switch">Need a seat? <a href="/auth/register">Create an account</a></p>
+  </section>
+</section>
 

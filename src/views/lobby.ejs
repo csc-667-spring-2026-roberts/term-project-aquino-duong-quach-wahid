@@ -1,19 +1,38 @@
 <%- include("partials/head", { title: "Lobby" }) %>
 <%- include("partials/header", { user }) %>
 
-<h2>Lobby</h2>
+<section class="lobby-hero" aria-labelledby="lobby-title">
+  <div class="hero-copy">
+    <p class="eyebrow">Online table</p>
+    <h1 id="lobby-title">UNO Lobby</h1>
+    <p>You are logged in as <strong><%= user.email %></strong>.</p>
 
-<p>You are logged in as <%= user.email %>.</p>
+    <button class="button create-game-button" id="create-game">Create Game</button>
+  </div>
 
-<button id="create-game">Create Game</button>
+  <div class="uno-card-fan" aria-hidden="true">
+    <span class="uno-card uno-card-red">7</span>
+    <span class="uno-card uno-card-yellow">+2</span>
+    <span class="uno-card uno-card-green">Skip</span>
+    <span class="uno-card uno-card-blue">Reverse</span>
+  </div>
+</section>
 
-<div id="games-list"></div>
+<section class="games-panel" aria-labelledby="games-title">
+  <div class="section-heading">
+    <p class="eyebrow">Open matches</p>
+    <h2 id="games-title">Choose a table</h2>
+  </div>
+
+  <div class="games-list" id="games-list"></div>
+</section>
 
 <template id="game-card-template">
-  <div>
-    <span data-game-id></span>
-    <span data-game-name></span>
+  <div class="game-card">
+    <span class="game-id" data-game-id></span>
+    <span class="game-name" data-game-name></span>
   </div>
 </template>
 
 <script defer src="/js/lobby.js"></script>
+
