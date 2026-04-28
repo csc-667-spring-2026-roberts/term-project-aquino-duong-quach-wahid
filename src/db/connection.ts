@@ -9,6 +9,9 @@ if (connectionString === undefined) {
   throw new Error("DATABASE_URL undefined in process environment");
 }
 
-const db = pgp()(connectionString);
+const db = pgp()({
+  connectionString,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+});
 
 export default db;

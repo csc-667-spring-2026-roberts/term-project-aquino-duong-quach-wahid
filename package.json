@@ -5,7 +5,8 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:server && npm run build:client && npm run migrate:up",
+    "build:server": "tsc",
     "build:client": "esbuild src/client/main.ts --bundle --outfile=public/js/main.js && esbuild src/client/lobby.ts --bundle --outfile=public/js/lobby.js",
     "watch:client": "esbuild src/client/main.ts --bundle --outfile=public/js/main.js --watch & esbuild src/client/lobby.ts --bundle --outfile=public/js/lobby.js --watch",
     "start": "node dist/server.js",
@@ -40,7 +41,6 @@
     "@types/node": "^20.11.0",
     "@types/pg-promise": "^0.0.28",
     "concurrently": "^9.2.1",
-    "connect-livereload": "^0.6.1",
     "esbuild": "^0.28.0",
     "eslint": "^9.0.0",
     "husky": "^9.0.0",

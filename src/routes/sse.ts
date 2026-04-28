@@ -4,6 +4,7 @@ type SSEClient = {
   id: string;
   room: string;
   res: Response;
+  keepalive: NodeJS.Timeout;
 };
 
 function sendEvent(res: Response, event: string, data: unknown): void {
@@ -21,6 +22,14 @@ function broadcast(room: string, event: string, data: unknown): void {
   }
 }
 
+function removeClient(id: string): void {
+  const client = clients.get(id);
+  if (client) {
+    clearInterval(client.keepalive);
+  }
+  clients.delete(id);
+}
+
 const router = Router();
 
 // GET /api/sse
@@ -36,17 +45,22 @@ router.get("/", (req: Request, res: Response) => {
 
   res.flushHeaders();
 
+  const keepalive = setInterval(() => {
+    try {
+      res.write(":ping\n\n");
+    } catch {
+      clearInterval(keepalive);
+    }
+  }, 25_000);
+
   const client: SSEClient = {
     id: clientId,
     room,
     res,
+    keepalive,
   };
 
   clients.set(clientId, client);
-
-  const heartbeat = setInterval(() => {
-    res.write(": heartbeat\n\n");
-  }, 25000);
 
   sendEvent(res, "connected", {
     clientId,
@@ -59,8 +73,7 @@ router.get("/", (req: Request, res: Response) => {
 
   // client disconnected
   req.on("close", () => {
-    clearInterval(heartbeat);
-    clients.delete(clientId);
+    removeClient(clientId);
     res.end();
   });
 });

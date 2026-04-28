@@ -31,6 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+app.set("trust proxy", 1);
+
 app.use(
   session({
     store: new (connectPgSimple(session))({
@@ -52,12 +54,17 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.use(loggingMiddleware);
 
-const liveReloadServer = livereload.createServer();
-
-liveReloadServer.watch(path.join(__dirname, "..", "public"));
-liveReloadServer.watch(path.join(__dirname, "views"));
-
-app.use(connectLiveReload());
+if (process.env.NODE_ENV !== "production") {
+  const liveReloadServer = livereload.createServer();
+  liveReloadServer.watch(path.join(__dirname, "..", "public"));
+  liveReloadServer.watch(path.join(__dirname, "views"));
+  app.use(connectLiveReload());
+  liveReloadServer.server.once("connection", () => {
+    setTimeout(() => {
+      liveReloadServer.refresh("/");
+    }, 100);
+  });
+}
 
 app.use("/auth", authRoutes);
 app.use("/lobby", lobbyRoutes);
@@ -72,8 +79,3 @@ app.listen(PORT, () => {
   console.log(`Server started on port ${String(PORT)} at ${new Date().toLocaleTimeString()}`);
 });
 
-liveReloadServer.server.once("connection", () => {
-  setTimeout(() => {
-    liveReloadServer.refresh("/");
-  }, 100);
-});
