@@ -305,7 +305,9 @@ h2 {
 
 .game-card {
   display: grid;
-  min-height: 9rem;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  min-height: 11rem;
   padding: 1rem;
   color: var(--paper);
   background:
@@ -336,6 +338,8 @@ h2 {
 }
 
 .game-id {
+  grid-column: 1;
+  grid-row: 1;
   align-self: start;
   width: max-content;
   min-width: 2.2rem;
@@ -349,11 +353,29 @@ h2 {
 }
 
 .game-name {
+  grid-column: 1 / -1;
+  grid-row: 2;
   align-self: end;
   font-size: 1.45rem;
   font-weight: 900;
   overflow-wrap: anywhere;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.24);
+}
+
+.game-players {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0.82;
+}
+
+.game-join-btn {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: end;
+  color: var(--paper);
 }
 
 .auth-scene {
