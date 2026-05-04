@@ -8,35 +8,34 @@ type Game = {
   id: number;
   name: string;
   players: number[];
-  started: boolean;
-  deck: string[];
-  pile: string[];
+  started?: boolean;
+  deck?: string[];
+  discardPile?: string[];
 };
 
 const games: Game[] = [];
 let nextId = 1;
 
-function shuffle(array: string[]): string[] {
+const createDeck = (): string[] => {
+  const colors = ["R", "G", "B", "Y"];
+  const deck: string[] = [];
+
+  for (const color of colors) {
+    for (let i = 0; i <= 9; i++) {
+      deck.push(`${color}${i}`);
+    }
+  }
+
+  return deck;
+};
+
+const shuffle = (array: string[]): string[] => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
-}
-
-function createDeck(): string[] {
-  const colors = ["R", "G", "B", "Y"];
-  const numbers = ["0","1","2","3","4","5","6","7","8","9"];
-  const deck: string[] = [];
-
-  for (const c of colors) {
-    for (const n of numbers) {
-      deck.push(c + n);
-    }
-  }
-
-  return shuffle(deck);
-}
+};
 
 router.get("/", (_req: Request, res: Response) => {
   res.json(games);
@@ -50,8 +49,7 @@ router.post("/", (req: Request, res: Response) => {
     name,
     players: [],
     started: false,
-    deck: [],
-    pile: [],
+    discardPile: [],
   };
 
   games.push(game);
@@ -61,12 +59,13 @@ router.post("/", (req: Request, res: Response) => {
 });
 
 router.post("/:id/join", requireAuth, (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const game = games.find(g => g.id === id);
+  const id = parseInt(req.params.id as string);
+  const game = games.find((g) => g.id === id);
 
   if (!game) return res.status(404).json({ error: "Game not found" });
 
-  const user = req.session.user!;
+  const user = req.session.user;
+  if (!user) return res.status(401).json({ error: "Not authenticated" });
 
   if (!game.players.includes(user.id)) {
     game.players.push(user.id);
@@ -76,26 +75,36 @@ router.post("/:id/join", requireAuth, (req: Request, res: Response) => {
   res.json(game);
 });
 
-router.post("/:id/start", (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const game = games.find(g => g.id === id);
+router.post("/:id/start", requireAuth, (req: Request, res: Response) => {
+  const id = parseInt(req.params.id as string);
+  const game = games.find((g) => g.id === id);
 
   if (!game) return res.status(404).json({ error: "Game not found" });
 
-  game.started = true;
-  game.deck = createDeck();
+  if (game.started) {
+    return res.status(400).json({ error: "Already started" });
+  }
 
-  // put first card in pile
-  game.pile.push(game.deck.pop()!);
+  if (game.players.length < 2) {
+    return res.status(400).json({ error: "Need 2 players" });
+  }
+
+  const deck = shuffle(createDeck());
+
+  game.deck = deck;
+  game.discardPile = [];
+  game.started = true;
+
+  console.log("GAME STARTED:", game.id);
 
   broadcastAll(games);
 
-  res.json(game);
+  res.json({ message: "Game started", game });
 });
 
-router.post("/:id/play", (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const game = games.find(g => g.id === id);
+router.post("/:id/play", requireAuth, (req: Request, res: Response) => {
+  const id = parseInt(req.params.id as string);
+  const game = games.find((g) => g.id === id);
 
   if (!game) return res.status(404).json({ error: "Game not found" });
 
@@ -103,15 +112,23 @@ router.post("/:id/play", (req: Request, res: Response) => {
     return res.status(400).json({ error: "Game not started" });
   }
 
-  const card = game.deck.pop();
-  if (card) {
-    game.pile.push(card);
-    console.log("Played card:", card);
+  if (!game.deck || game.deck.length === 0) {
+    return res.status(400).json({ error: "No cards left" });
   }
+
+  const card = game.deck.pop();
+
+  if (!card) {
+    return res.status(400).json({ error: "Invalid card" });
+  }
+
+  game.discardPile?.push(card);
+
+  console.log("PLAYED:", card);
 
   broadcastAll(games);
 
-  res.json(game);
+  res.json({ message: "Card played", card });
 });
 
 export default router;

@@ -1,77 +1,128 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const createGameBtn = document.getElementById("create-game") as HTMLButtonElement;
-  const gamesList = document.getElementById("games-list") as HTMLDivElement;
-  const template = document.getElementById("game-card-template") as HTMLTemplateElement;
+type Game = {
+  id: number;
+  name: string;
+  players: number[];
+  started?: boolean;
+  deck?: string[];
+  discardPile?: string[];
+};
 
-  const joinGame = async (id: number) => {
-    await fetch(`/api/games/${id}/join`, { method: "POST" });
-  };
+const createGameBtn = document.getElementById("create-game") as HTMLButtonElement;
+const gamesList = document.getElementById("games-list") as HTMLDivElement;
+const gameCardTemplate = document.getElementById("game-card-template") as HTMLTemplateElement;
 
-  const startGame = async (id: number) => {
-    await fetch(`/api/games/${id}/start`, { method: "POST" });
-  };
+const joinGame = async (id: number): Promise<void> => {
+  await fetch(`/api/games/${id}/join`, { method: "POST" });
+};
 
-  const playCard = async (id: number) => {
-    await fetch(`/api/games/${id}/play`, { method: "POST" });
-  };
+const startGame = async (id: number): Promise<void> => {
+  await fetch(`/api/games/${id}/start`, { method: "POST" });
+};
 
-  const renderGame = (game: any) => {
-    const clone = template.content.cloneNode(true) as DocumentFragment;
+const playCard = async (id: number): Promise<void> => {
+  await fetch(`/api/games/${id}/play`, { method: "POST" });
+};
 
-    const idSpan = clone.querySelector("[data-game-id]")!;
-    const nameSpan = clone.querySelector("[data-game-name]")!;
-    const playersSpan = clone.querySelector("[data-game-players]")!;
-    const joinBtn = clone.querySelector("[data-join-btn]") as HTMLButtonElement;
+const renderGame = (game: Game): void => {
+  const clone = gameCardTemplate.content.cloneNode(true) as DocumentFragment;
 
-    idSpan.textContent = game.id;
-    nameSpan.textContent = game.name;
-    playersSpan.textContent = `${game.players.length} players`;
+  const idSpan = clone.querySelector("[data-game-id]") as HTMLSpanElement;
+  const nameSpan = clone.querySelector("[data-game-name]") as HTMLSpanElement;
+  const playersSpan = clone.querySelector("[data-game-players]") as HTMLSpanElement;
+  const joinBtn = clone.querySelector("[data-join-btn]") as HTMLButtonElement;
 
-    joinBtn.onclick = () => joinGame(game.id);
+  idSpan.textContent = String(game.id);
+  nameSpan.textContent = game.name;
+  playersSpan.textContent = `${game.players.length} players`;
 
-    const card = clone.querySelector(".game-card")!;
+  joinBtn.addEventListener("click", () => void joinGame(game.id));
 
-    const startBtn = document.createElement("button");
-    startBtn.textContent = "Start";
-    startBtn.onclick = () => startGame(game.id);
+  const card = clone.querySelector(".game-card") as HTMLDivElement;
 
-    const playBtn = document.createElement("button");
-    playBtn.textContent = "Play";
-    playBtn.onclick = () => playCard(game.id);
+  const buttonRow = document.createElement("div");
+  buttonRow.style.display = "flex";
+  buttonRow.style.gap = "8px"; // clean spacing
+  buttonRow.style.marginTop = "8px";
 
-    card.appendChild(startBtn);
-    card.appendChild(playBtn);
+  const startBtn = document.createElement("button");
+  startBtn.textContent = game.started ? "Game Started" : "Start Game";
+  startBtn.disabled = game.started === true;
 
-    gamesList.appendChild(clone);
-  };
+  startBtn.classList.add("button", "button-small");
 
-  const renderGames = (games: any[]) => {
-    gamesList.innerHTML = "";
-    games.forEach(renderGame);
-  };
+  startBtn.addEventListener("click", () => void startGame(game.id));
 
-  const loadGames = async () => {
-    const res = await fetch("/api/games");
-    const games = await res.json();
-    renderGames(games);
-  };
+  const playBtn = document.createElement("button");
+  playBtn.textContent = "Play Card";
+  playBtn.disabled = !game.started;
 
-  const createGame = async () => {
-    await fetch("/api/games", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "UNO Game" }),
-    });
-  };
+  playBtn.classList.add("button", "button-small");
 
-  const eventSource = new EventSource("/api/sse");
+  playBtn.addEventListener("click", () => void playCard(game.id));
 
-  eventSource.onmessage = (event) => {
-    const games = JSON.parse(event.data);
-    renderGames(games);
-  };
+  buttonRow.appendChild(startBtn);
+  buttonRow.appendChild(playBtn);
 
-  createGameBtn.onclick = createGame;
+  const info = document.createElement("div");
+  info.style.marginTop = "6px";
 
-  loadGames();
-});
+  if (game.discardPile && game.discardPile.length > 0) {
+    const lastCard = game.discardPile[game.discardPile.length - 1];
+    info.textContent = `Last played: ${lastCard}`;
+  } else {
+    info.textContent = "No cards played yet";
+  }
+
+  const deckInfo = document.createElement("div");
+
+  if (game.deck) {
+    deckInfo.textContent = `Cards left: ${game.deck.length}`;
+  }
+
+  card.appendChild(buttonRow);
+  card.appendChild(info);
+  card.appendChild(deckInfo);
+
+  gamesList.appendChild(clone);
+};
+
+const renderGames = (games: Game[]): void => {
+  gamesList.innerHTML = "";
+
+  if (!games.length) {
+    gamesList.innerHTML = "<p>No games yet.</p>";
+    return;
+  }
+
+  games.forEach(renderGame);
+};
+
+const loadGames = async (): Promise<void> => {
+  const res = await fetch("/api/games");
+  const games = (await res.json()) as Game[];
+  renderGames(games);
+};
+
+const createGame = async (): Promise<void> => {
+  await fetch("/api/games", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: `Game ${Date.now()}` }),
+  });
+};
+
+const eventSource = new EventSource("/api/sse");
+
+eventSource.onmessage = (event: MessageEvent): void => {
+  const games = JSON.parse(event.data) as Game[];
+  renderGames(games);
+};
+
+eventSource.onerror = (err): void => {
+  console.error("SSE error:", err);
+};
+
+createGameBtn.addEventListener("click", () => void createGame());
+
+// Initial load
+void loadGames();
