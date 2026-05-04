@@ -22,7 +22,7 @@ const createDeck = (): string[] => {
 
   for (const color of colors) {
     for (let i = 0; i <= 9; i++) {
-      deck.push(`${color}${i}`);
+      deck.push(`${color}${String(i)}`);
     }
   }
 
@@ -32,7 +32,9 @@ const createDeck = (): string[] => {
 const shuffle = (array: string[]): string[] => {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    const temp = array[i] as string;
+    array[i] = array[j] as string;
+    array[j] = temp;
   }
   return array;
 };
@@ -62,10 +64,16 @@ router.post("/:id/join", requireAuth, (req: Request, res: Response) => {
   const id = parseInt(req.params.id as string);
   const game = games.find((g) => g.id === id);
 
-  if (!game) return res.status(404).json({ error: "Game not found" });
+  if (!game) {
+    res.status(404).json({ error: "Game not found" });
+    return;
+  }
 
   const user = req.session.user;
-  if (!user) return res.status(401).json({ error: "Not authenticated" });
+  if (!user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
 
   if (!game.players.includes(user.id)) {
     game.players.push(user.id);
@@ -79,14 +87,19 @@ router.post("/:id/start", requireAuth, (req: Request, res: Response) => {
   const id = parseInt(req.params.id as string);
   const game = games.find((g) => g.id === id);
 
-  if (!game) return res.status(404).json({ error: "Game not found" });
+  if (!game) {
+    res.status(404).json({ error: "Game not found" });
+    return;
+  }
 
   if (game.started) {
-    return res.status(400).json({ error: "Already started" });
+    res.status(400).json({ error: "Already started" });
+    return;
   }
 
   if (game.players.length < 2) {
-    return res.status(400).json({ error: "Need 2 players" });
+    res.status(400).json({ error: "Need 2 players" });
+    return;
   }
 
   const deck = shuffle(createDeck());
@@ -106,20 +119,26 @@ router.post("/:id/play", requireAuth, (req: Request, res: Response) => {
   const id = parseInt(req.params.id as string);
   const game = games.find((g) => g.id === id);
 
-  if (!game) return res.status(404).json({ error: "Game not found" });
+  if (!game) {
+    res.status(404).json({ error: "Game not found" });
+    return;
+  }
 
   if (!game.started) {
-    return res.status(400).json({ error: "Game not started" });
+    res.status(400).json({ error: "Game not started" });
+    return;
   }
 
   if (!game.deck || game.deck.length === 0) {
-    return res.status(400).json({ error: "No cards left" });
+    res.status(400).json({ error: "No cards left" });
+    return;
   }
 
   const card = game.deck.pop();
 
   if (!card) {
-    return res.status(400).json({ error: "Invalid card" });
+    res.status(400).json({ error: "Invalid card" });
+    return;
   }
 
   game.discardPile?.push(card);
