@@ -1,78 +1,77 @@
-// get elements
-const createGameBtn = document.getElementById("create-game") as HTMLButtonElement;
-const gamesList = document.getElementById("games-list") as HTMLDivElement;
-const gameCardTemplate = document.getElementById("game-card-template") as HTMLTemplateElement;
+document.addEventListener("DOMContentLoaded", () => {
+  const createGameBtn = document.getElementById("create-game") as HTMLButtonElement;
+  const gamesList = document.getElementById("games-list") as HTMLDivElement;
+  const template = document.getElementById("game-card-template") as HTMLTemplateElement;
 
-// join a game
-const joinGame = async (id: number) => {
-  const res = await fetch(`/api/games/${id}/join`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!res.ok) {
-    console.error("Failed to join game");
-  }
-};
+  const joinGame = async (id: number) => {
+    await fetch(`/api/games/${id}/join`, { method: "POST" });
+  };
 
-// render one game
-const renderGame = (game: { id: number; name: string; players: number[] }) => {
-  const clone = gameCardTemplate.content.cloneNode(true) as DocumentFragment;
-  const idSpan = clone.querySelector("[data-game-id]") as HTMLSpanElement;
-  const nameSpan = clone.querySelector("[data-game-name]") as HTMLSpanElement;
-  const playersSpan = clone.querySelector("[data-game-players]") as HTMLSpanElement;
-  const joinBtn = clone.querySelector("[data-join-btn]") as HTMLButtonElement;
-  idSpan.textContent = String(game.id);
-  nameSpan.textContent = game.name;
-  playersSpan.textContent = `${game.players.length} players`;
-  joinBtn.addEventListener("click", () => { void joinGame(game.id); });
-  gamesList.appendChild(clone);
-};
+  const startGame = async (id: number) => {
+    await fetch(`/api/games/${id}/start`, { method: "POST" });
+  };
 
-// render all games
-const renderGames = (games: { id: number; name: string; players: number[] }[]) => {
-  gamesList.innerHTML = "";
-  if (!games.length) {
-    gamesList.innerHTML = "<p>No games yet.</p>";
-    return;
-  }
-  games.forEach(renderGame);
-};
+  const playCard = async (id: number) => {
+    await fetch(`/api/games/${id}/play`, { method: "POST" });
+  };
 
-// load games on start
-const loadGames = async () => {
-  const res = await fetch("/api/games");
-  const games = await res.json() as { id: number; name: string; players: number[] }[];
-  renderGames(games);
-};
+  const renderGame = (game: any) => {
+    const clone = template.content.cloneNode(true) as DocumentFragment;
 
-// create a game
-const createGame = async () => {
-  const res = await fetch("/api/games", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: `Game ${Date.now()}` }),
-  });
-  if (!res.ok) {
-    console.error("Failed to create game");
-  }
-};
+    const idSpan = clone.querySelector("[data-game-id]")!;
+    const nameSpan = clone.querySelector("[data-game-name]")!;
+    const playersSpan = clone.querySelector("[data-game-players]")!;
+    const joinBtn = clone.querySelector("[data-join-btn]") as HTMLButtonElement;
 
-// connect to SSE
-const eventSource = new EventSource("/api/sse");
+    idSpan.textContent = game.id;
+    nameSpan.textContent = game.name;
+    playersSpan.textContent = `${game.players.length} players`;
 
-// handle incoming events
-eventSource.onmessage = (event) => {
-  const games = JSON.parse(event.data) as { id: number; name: string; players: number[] }[];
-  renderGames(games);
-};
+    joinBtn.onclick = () => joinGame(game.id);
 
-// handle errors
-eventSource.onerror = (error) => {
-  console.error(error);
-};
+    const card = clone.querySelector(".game-card")!;
 
-// button click
-createGameBtn?.addEventListener("click", createGame);
+    const startBtn = document.createElement("button");
+    startBtn.textContent = "Start";
+    startBtn.onclick = () => startGame(game.id);
 
-// initial load
-void loadGames();
+    const playBtn = document.createElement("button");
+    playBtn.textContent = "Play";
+    playBtn.onclick = () => playCard(game.id);
+
+    card.appendChild(startBtn);
+    card.appendChild(playBtn);
+
+    gamesList.appendChild(clone);
+  };
+
+  const renderGames = (games: any[]) => {
+    gamesList.innerHTML = "";
+    games.forEach(renderGame);
+  };
+
+  const loadGames = async () => {
+    const res = await fetch("/api/games");
+    const games = await res.json();
+    renderGames(games);
+  };
+
+  const createGame = async () => {
+    await fetch("/api/games", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "UNO Game" }),
+    });
+  };
+
+  const eventSource = new EventSource("/api/sse");
+
+  eventSource.onmessage = (event) => {
+    const games = JSON.parse(event.data);
+    renderGames(games);
+  };
+
+  createGameBtn.onclick = createGame;
+
+  loadGames();
+});

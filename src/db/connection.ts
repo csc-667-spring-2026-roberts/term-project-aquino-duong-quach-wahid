@@ -5,13 +5,16 @@ dotenv.config();
 
 const connectionString = process.env.DATABASE_URL;
 
-if (connectionString === undefined) {
+if (!connectionString) {
   throw new Error("DATABASE_URL undefined in process environment");
 }
 
 const db = pgp()({
   connectionString,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export default db;
