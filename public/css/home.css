@@ -362,6 +362,31 @@ h2 {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.24);
 }
 
+.game-turn-badge {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  justify-self: end;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: var(--uno-yellow);
+  color: var(--ink);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.game-turn-badge:empty {
+  display: none;
+}
+
+.game-turn-badge.waiting {
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 253, 245, 0.65);
+  box-shadow: none;
+}
+
 .game-players {
   grid-column: 1;
   grid-row: 3;
@@ -376,6 +401,14 @@ h2 {
   grid-row: 3;
   justify-self: end;
   color: var(--paper);
+}
+
+.game-action-error {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ff6b6b;
+  min-height: 1rem;
 }
 
 .auth-scene {

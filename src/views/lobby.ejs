@@ -18,6 +18,8 @@
   </div>
 </section>
 
+<span id="current-user-id" data-user-id="<%= user.id %>" hidden></span>
+
 <section class="games-panel" aria-labelledby="games-title">
   <div class="section-heading">
     <p class="eyebrow">Open matches</p>
@@ -30,6 +32,7 @@
 <template id="game-card-template">
   <div class="game-card">
     <span class="game-id" data-game-id></span>
+    <span class="game-turn-badge" data-turn-badge></span>
     <span class="game-name" data-game-name></span>
     <span class="game-players" data-game-players></span>
     <button class="button button-small game-join-btn" data-join-btn>Join</button>

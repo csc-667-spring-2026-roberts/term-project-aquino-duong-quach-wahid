@@ -11,6 +11,8 @@ type Game = {
   started?: boolean;
   deck?: string[];
   discardPile?: string[];
+  currentPlayerIndex?: number;
+  direction?: number;
 };
 
 const games: Game[] = [];
@@ -107,6 +109,8 @@ router.post("/:id/start", requireAuth, (req: Request, res: Response) => {
   game.deck = deck;
   game.discardPile = [];
   game.started = true;
+  game.currentPlayerIndex = 0;
+  game.direction = 1;
 
   console.log("GAME STARTED:", game.id);
 
@@ -129,6 +133,18 @@ router.post("/:id/play", requireAuth, (req: Request, res: Response) => {
     return;
   }
 
+  const user = req.session.user;
+  if (!user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
+
+  const currentPlayerId = game.players[game.currentPlayerIndex ?? 0];
+  if (user.id !== currentPlayerId) {
+    res.status(403).json({ error: "Not your turn" });
+    return;
+  }
+
   if (!game.deck || game.deck.length === 0) {
     res.status(400).json({ error: "No cards left" });
     return;
@@ -142,6 +158,10 @@ router.post("/:id/play", requireAuth, (req: Request, res: Response) => {
   }
 
   game.discardPile?.push(card);
+
+  const playerCount = game.players.length;
+  game.currentPlayerIndex =
+    ((game.currentPlayerIndex ?? 0) + (game.direction ?? 1) + playerCount) % playerCount;
 
   console.log("PLAYED:", card);
 

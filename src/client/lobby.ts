@@ -5,22 +5,28 @@ type Game = {
   started?: boolean;
   deck?: string[];
   discardPile?: string[];
+  currentPlayerIndex?: number;
+  direction?: number;
 };
+
+const currentUserId = parseInt(
+  (document.getElementById("current-user-id") as HTMLElement).dataset.userId ?? "0",
+);
 
 const createGameBtn = document.getElementById("create-game") as HTMLButtonElement;
 const gamesList = document.getElementById("games-list") as HTMLDivElement;
 const gameCardTemplate = document.getElementById("game-card-template") as HTMLTemplateElement;
 
 const joinGame = async (id: number): Promise<void> => {
-  await fetch(`/api/games/${id}/join`, { method: "POST" });
+  await fetch(`/api/games/${String(id)}/join`, { method: "POST" });
 };
 
 const startGame = async (id: number): Promise<void> => {
-  await fetch(`/api/games/${id}/start`, { method: "POST" });
+  await fetch(`/api/games/${String(id)}/start`, { method: "POST" });
 };
 
-const playCard = async (id: number): Promise<void> => {
-  await fetch(`/api/games/${id}/play`, { method: "POST" });
+const playCard = async (id: number): Promise<Response> => {
+  return fetch(`/api/games/${String(id)}/play`, { method: "POST" });
 };
 
 const renderGame = (game: Game): void => {
@@ -30,35 +36,54 @@ const renderGame = (game: Game): void => {
   const nameSpan = clone.querySelector("[data-game-name]") as HTMLSpanElement;
   const playersSpan = clone.querySelector("[data-game-players]") as HTMLSpanElement;
   const joinBtn = clone.querySelector("[data-join-btn]") as HTMLButtonElement;
+  const turnBadge = clone.querySelector("[data-turn-badge]") as HTMLSpanElement;
 
   idSpan.textContent = String(game.id);
   nameSpan.textContent = game.name;
-  playersSpan.textContent = `${game.players.length} players`;
+  playersSpan.textContent = `${String(game.players.length)} players`;
 
   joinBtn.addEventListener("click", () => void joinGame(game.id));
+
+  const isMyTurn =
+    game.started === true && game.players[game.currentPlayerIndex ?? 0] === currentUserId;
+
+  if (game.started) {
+    turnBadge.textContent = isMyTurn ? "Your Turn" : "Waiting...";
+    if (!isMyTurn) turnBadge.classList.add("waiting");
+  }
 
   const card = clone.querySelector(".game-card") as HTMLDivElement;
 
   const buttonRow = document.createElement("div");
   buttonRow.style.display = "flex";
-  buttonRow.style.gap = "8px"; // clean spacing
+  buttonRow.style.gap = "8px";
   buttonRow.style.marginTop = "8px";
 
   const startBtn = document.createElement("button");
   startBtn.textContent = game.started ? "Game Started" : "Start Game";
   startBtn.disabled = game.started === true;
-
   startBtn.classList.add("button", "button-small");
-
   startBtn.addEventListener("click", () => void startGame(game.id));
 
   const playBtn = document.createElement("button");
   playBtn.textContent = "Play Card";
-  playBtn.disabled = !game.started;
-
+  playBtn.disabled = !isMyTurn;
   playBtn.classList.add("button", "button-small");
 
-  playBtn.addEventListener("click", () => void playCard(game.id));
+  const errorDiv = document.createElement("div");
+  errorDiv.classList.add("game-action-error");
+
+  playBtn.addEventListener("click", () => {
+    void playCard(game.id).then(async (res) => {
+      if (!res.ok) {
+        const body = (await res.json()) as { error: string };
+        errorDiv.textContent = body.error;
+        setTimeout(() => {
+          errorDiv.textContent = "";
+        }, 3000);
+      }
+    });
+  });
 
   buttonRow.appendChild(startBtn);
   buttonRow.appendChild(playBtn);
@@ -68,7 +93,7 @@ const renderGame = (game: Game): void => {
 
   if (game.discardPile && game.discardPile.length > 0) {
     const lastCard = game.discardPile[game.discardPile.length - 1];
-    info.textContent = `Last played: ${lastCard}`;
+    info.textContent = `Last played: ${lastCard ?? ""}`;
   } else {
     info.textContent = "No cards played yet";
   }
@@ -76,12 +101,13 @@ const renderGame = (game: Game): void => {
   const deckInfo = document.createElement("div");
 
   if (game.deck) {
-    deckInfo.textContent = `Cards left: ${game.deck.length}`;
+    deckInfo.textContent = `Cards left: ${String(game.deck.length)}`;
   }
 
   card.appendChild(buttonRow);
   card.appendChild(info);
   card.appendChild(deckInfo);
+  card.appendChild(errorDiv);
 
   gamesList.appendChild(clone);
 };
@@ -107,14 +133,14 @@ const createGame = async (): Promise<void> => {
   await fetch("/api/games", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: `Game ${Date.now()}` }),
+    body: JSON.stringify({ name: `Game ${String(Date.now())}` }),
   });
 };
 
 const eventSource = new EventSource("/api/sse");
 
 eventSource.onmessage = (event: MessageEvent): void => {
-  const games = JSON.parse(event.data) as Game[];
+  const games = JSON.parse(event.data as string) as Game[];
   renderGames(games);
 };
 
