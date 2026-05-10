@@ -404,11 +404,122 @@ h2 {
 }
 
 .game-action-error {
-  grid-column: 1 / -1;
   font-size: 0.78rem;
   font-weight: 800;
   color: #ff6b6b;
   min-height: 1rem;
+}
+
+.game-extras {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.hand-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hand-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.hand-card {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  min-width: 2.6rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  background: var(--paper);
+  color: var(--ink);
+  border: 0.18rem solid rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  transition: transform 100ms ease;
+}
+
+.hand-card:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.hand-card:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+
+.hand-card-R {
+  background: var(--uno-red);
+  color: var(--paper);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hand-card-G {
+  background: var(--uno-green);
+  color: var(--paper);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hand-card-B {
+  background: var(--uno-blue);
+  color: var(--paper);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.hand-card-Y {
+  background: var(--uno-yellow);
+  color: var(--ink);
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.hand-card-W {
+  background: #1a1a1a;
+  color: var(--paper);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.color-picker {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.color-btn {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 900;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  border: 0.18rem solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+}
+
+.color-btn-R {
+  background: var(--uno-red);
+  color: var(--paper);
+}
+
+.color-btn-G {
+  background: var(--uno-green);
+  color: var(--paper);
+}
+
+.color-btn-B {
+  background: var(--uno-blue);
+  color: var(--paper);
+}
+
+.color-btn-Y {
+  background: var(--uno-yellow);
+  color: var(--ink);
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .auth-scene {
