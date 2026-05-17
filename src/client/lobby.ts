@@ -19,6 +19,9 @@ const createGameBtn = document.getElementById("create-game") as HTMLButtonElemen
 const gamesList = document.getElementById("games-list") as HTMLDivElement;
 const gameCardTemplate = document.getElementById("game-card-template") as HTMLTemplateElement;
 
+let expandedGameId: number | null = null;
+let lastKnownGames: Game[] = [];
+
 const joinGame = async (id: number): Promise<void> => {
   await fetch(`/api/games/${String(id)}/join`, { method: "POST" });
 };
@@ -192,7 +195,7 @@ const renderStartedSection = (
   extras.appendChild(drawBtn);
 };
 
-const renderGame = (game: Game): void => {
+const renderGame = (game: Game, container: HTMLElement = gamesList): void => {
   const clone = gameCardTemplate.content.cloneNode(true) as DocumentFragment;
 
   const idSpan = clone.querySelector("[data-game-id]") as HTMLSpanElement;
@@ -217,7 +220,7 @@ const renderGame = (game: Game): void => {
 
   const card = clone.querySelector(".game-card") as HTMLDivElement;
 
-  // Single wrapper spanning both grid columns for all dynamic content
+  // spans both grid columns
   const extras = document.createElement("div");
   extras.classList.add("game-extras");
   card.appendChild(extras);
@@ -236,11 +239,94 @@ const renderGame = (game: Game): void => {
     renderStartedSection(game, extras, errorDiv, isMyTurn);
   }
 
+  const expandBtn = document.createElement("button");
+  expandBtn.textContent = "Expand";
+  expandBtn.classList.add("button", "button-small", "button-outline");
+  expandBtn.addEventListener("click", () => {
+    expandedGameId = game.id;
+    renderGames(lastKnownGames);
+  });
+  extras.appendChild(expandBtn);
+
   extras.appendChild(errorDiv);
-  gamesList.appendChild(clone);
+  container.appendChild(clone);
+};
+
+const renderCompactGame = (game: Game, container: HTMLElement): void => {
+  const div = document.createElement("div");
+  div.classList.add("game-card-compact");
+
+  const name = document.createElement("div");
+  name.classList.add("compact-name");
+  name.textContent = game.name;
+  div.appendChild(name);
+
+  const players = document.createElement("div");
+  players.classList.add("compact-players");
+  players.textContent = `${String(game.players.length)} players`;
+  div.appendChild(players);
+
+  if (game.started) {
+    const isMyTurn = game.players[game.currentPlayerIndex ?? 0] === currentUserId;
+    const badge = document.createElement("span");
+    badge.classList.add("compact-badge");
+    badge.textContent = isMyTurn ? "Your Turn" : "In Progress";
+    if (!isMyTurn) badge.classList.add("waiting");
+    div.appendChild(badge);
+  }
+
+  const expandBtn = document.createElement("button");
+  expandBtn.textContent = "Expand";
+  expandBtn.classList.add("button", "button-small");
+  expandBtn.addEventListener("click", () => {
+    expandedGameId = game.id;
+    renderGames(lastKnownGames);
+  });
+  div.appendChild(expandBtn);
+  container.appendChild(div);
+};
+
+const renderSplitView = (game: Game, others: Game[]): void => {
+  const split = document.createElement("div");
+  split.classList.add("lobby-split");
+
+  const main = document.createElement("div");
+  main.classList.add("lobby-main");
+
+  const collapseBtn = document.createElement("button");
+  collapseBtn.textContent = "← All Games";
+  collapseBtn.classList.add("button", "button-small", "button-outline");
+  collapseBtn.addEventListener("click", () => {
+    expandedGameId = null;
+    renderGames(lastKnownGames);
+  });
+  main.appendChild(collapseBtn);
+  renderGame(game, main);
+
+  const sidebar = document.createElement("div");
+  sidebar.classList.add("lobby-sidebar");
+
+  const heading = document.createElement("div");
+  heading.classList.add("sidebar-heading");
+  heading.textContent = "Other Games";
+  sidebar.appendChild(heading);
+
+  if (others.length === 0) {
+    const empty = document.createElement("div");
+    empty.classList.add("sidebar-empty");
+    empty.textContent = "No other games";
+    sidebar.appendChild(empty);
+  } else {
+    others.forEach((g) => { renderCompactGame(g, sidebar); });
+  }
+
+  split.appendChild(main);
+  split.appendChild(sidebar);
+  gamesList.appendChild(split);
 };
 
 const renderGames = (games: Game[]): void => {
+  lastKnownGames = games;
   gamesList.innerHTML = "";
 
   if (!games.length) {
@@ -248,7 +334,19 @@ const renderGames = (games: Game[]): void => {
     return;
   }
 
-  games.forEach(renderGame);
+  if (expandedGameId !== null) {
+    const expanded = games.find((g) => g.id === expandedGameId);
+    if (expanded !== undefined) {
+      renderSplitView(
+        expanded,
+        games.filter((g) => g.id !== expandedGameId),
+      );
+      return;
+    }
+    expandedGameId = null;
+  }
+
+  games.forEach((g) => { renderGame(g); });
 };
 
 const loadGames = async (): Promise<void> => {
