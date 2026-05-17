@@ -656,6 +656,40 @@ h2 {
   transform: rotate(-25deg);
 }
 
+.discard-top {
+  width: 4.5rem;
+  aspect-ratio: 5 / 7;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--paper);
+  border: 0.3rem solid var(--paper);
+  border-radius: 8px;
+  box-shadow: 0 6px 0 #111;
+}
+
+.discard-top.hand-card-Y {
+  color: var(--ink);
+}
+
+.table-player-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.table-player-area .hand-section {
+  max-height: 12rem;
+  overflow-y: auto;
+  align-self: stretch;
+}
+
+.opponent-active .face-down-stack {
+  box-shadow: 0 0 0 3px var(--uno-yellow), -3px -3px 0 rgba(0, 0, 0, 0.3), -6px -6px 0 rgba(0, 0, 0, 0.15);
+}
+
 .auth-scene {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(19rem, 28rem);
