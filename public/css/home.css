@@ -690,6 +690,73 @@ h2 {
   box-shadow: 0 0 0 3px var(--uno-yellow), -3px -3px 0 rgba(0, 0, 0, 0.3), -6px -6px 0 rgba(0, 0, 0, 0.15);
 }
 
+.opponent-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.card-count {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 0.72rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+.opponent-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  opacity: 0.82;
+  max-width: 5.5rem;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opponent-turn-badge {
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  background: var(--uno-yellow);
+  color: var(--ink);
+  border-radius: 3px;
+}
+
+.table-center-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.pile-count {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 0.8rem;
+  padding: 0.12rem 0.35rem;
+  border-radius: 3px;
+}
+
+.player-area-label {
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.player-area-active {
+  opacity: 1;
+  color: var(--uno-yellow);
+}
+
 .auth-scene {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(19rem, 28rem);

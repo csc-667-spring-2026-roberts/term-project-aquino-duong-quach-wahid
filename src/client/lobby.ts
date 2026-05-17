@@ -252,6 +252,137 @@ const renderGame = (game: Game, container: HTMLElement = gamesList): void => {
   container.appendChild(clone);
 };
 
+const buildOpponentSlot = (
+  playerId: number,
+  handCount: number,
+  isCurrentTurn: boolean,
+): HTMLDivElement => {
+  const slot = document.createElement("div");
+  slot.classList.add("opponent-slot");
+  if (isCurrentTurn) slot.classList.add("opponent-active");
+
+  const stack = document.createElement("div");
+  stack.classList.add("face-down-stack");
+  const count = document.createElement("span");
+  count.classList.add("card-count");
+  count.textContent = String(handCount);
+  stack.appendChild(count);
+  slot.appendChild(stack);
+
+  const label = document.createElement("div");
+  label.classList.add("opponent-label");
+  label.textContent = `Player ${String(playerId)}`;
+  slot.appendChild(label);
+
+  if (isCurrentTurn) {
+    const badge = document.createElement("div");
+    badge.classList.add("opponent-turn-badge");
+    badge.textContent = "Their Turn";
+    slot.appendChild(badge);
+  }
+
+  return slot;
+};
+
+const buildOpponents = (game: Game, table: HTMLDivElement): void => {
+  const opponents = document.createElement("div");
+  opponents.classList.add("table-opponents");
+
+  const currentTurnIdx = game.currentPlayerIndex ?? 0;
+
+  for (let i = 0; i < game.players.length; i++) {
+    const playerId = game.players[i];
+    if (playerId === undefined || playerId === currentUserId) continue;
+    const handCount = game.hands?.[String(playerId)]?.length ?? 0;
+    const isCurrentTurn = i === currentTurnIdx;
+    opponents.appendChild(buildOpponentSlot(playerId, handCount, isCurrentTurn));
+  }
+
+  table.appendChild(opponents);
+};
+
+const buildCenter = (
+  game: Game,
+  table: HTMLDivElement,
+  topCard: string,
+  currentColor: string,
+): void => {
+  const center = document.createElement("div");
+  center.classList.add("table-center-area");
+
+  const drawPile = document.createElement("div");
+  drawPile.classList.add("draw-pile-stack");
+  const drawLabel = document.createElement("span");
+  drawLabel.classList.add("pile-count");
+  drawLabel.textContent = String(game.drawPile?.length ?? 0);
+  drawPile.appendChild(drawLabel);
+
+  const topColorCode = cardColorOf(topCard);
+  const colorCode = topColorCode === "W" ? currentColor : topColorCode;
+  const discard = document.createElement("div");
+  discard.classList.add("discard-top", `hand-card-${colorCode}`);
+  discard.textContent = topCard ? cardLabel(topCard) : "—";
+
+  center.appendChild(drawPile);
+  center.appendChild(discard);
+  table.appendChild(center);
+};
+
+const buildMyArea = (
+  game: Game,
+  table: HTMLDivElement,
+  errorDiv: HTMLDivElement,
+  isMyTurn: boolean,
+  topCard: string,
+  currentColor: string,
+): void => {
+  const myArea = document.createElement("div");
+  myArea.classList.add("table-player-area");
+
+  const label = document.createElement("div");
+  label.classList.add("player-area-label");
+  label.textContent = isMyTurn ? "Your Turn" : "Your Hand";
+  if (isMyTurn) label.classList.add("player-area-active");
+  myArea.appendChild(label);
+
+  buildHandSection(game, myArea, errorDiv, isMyTurn, topCard, currentColor);
+
+  const drawBtn = document.createElement("button");
+  drawBtn.textContent = "Draw Card";
+  drawBtn.disabled = !isMyTurn;
+  drawBtn.classList.add("button", "button-small");
+  drawBtn.addEventListener("click", () => {
+    void drawCard(game.id).then(async (res) => {
+      if (!res.ok) {
+        const body = (await res.json()) as { error: string };
+        showError(errorDiv, body.error);
+      }
+    });
+  });
+  myArea.appendChild(drawBtn);
+  table.appendChild(myArea);
+};
+
+const renderTableView = (game: Game, container: HTMLElement): void => {
+  const topCard = game.discardPile?.[game.discardPile.length - 1] ?? "";
+  const currentColor = game.currentColor ?? cardColorOf(topCard);
+  const isMyTurn =
+    game.started === true && game.players[game.currentPlayerIndex ?? 0] === currentUserId;
+
+  const errorDiv = document.createElement("div");
+  errorDiv.classList.add("game-action-error");
+
+  const table = document.createElement("div");
+  table.classList.add("game-table");
+
+  buildOpponents(game, table);
+  buildCenter(game, table, topCard, currentColor);
+  buildMyArea(game, table, errorDiv, isMyTurn, topCard, currentColor);
+
+  container.appendChild(table);
+  container.appendChild(errorDiv);
+};
+
 const renderCompactGame = (game: Game, container: HTMLElement): void => {
   const div = document.createElement("div");
   div.classList.add("game-card-compact");
@@ -301,7 +432,11 @@ const renderSplitView = (game: Game, others: Game[]): void => {
     renderGames(lastKnownGames);
   });
   main.appendChild(collapseBtn);
-  renderGame(game, main);
+  if (game.started === true) {
+    renderTableView(game, main);
+  } else {
+    renderGame(game, main);
+  }
 
   const sidebar = document.createElement("div");
   sidebar.classList.add("lobby-sidebar");
@@ -317,7 +452,9 @@ const renderSplitView = (game: Game, others: Game[]): void => {
     empty.textContent = "No other games";
     sidebar.appendChild(empty);
   } else {
-    others.forEach((g) => { renderCompactGame(g, sidebar); });
+    others.forEach((g) => {
+      renderCompactGame(g, sidebar);
+    });
   }
 
   split.appendChild(main);
@@ -346,7 +483,9 @@ const renderGames = (games: Game[]): void => {
     expandedGameId = null;
   }
 
-  games.forEach((g) => { renderGame(g); });
+  games.forEach((g) => {
+    renderGame(g);
+  });
 };
 
 const loadGames = async (): Promise<void> => {
