@@ -9,6 +9,7 @@ type Game = {
   currentPlayerIndex?: number;
   direction?: number;
   currentColor?: string;
+  winnerId?: number;
 };
 
 const currentUserId = parseInt(
@@ -364,10 +365,20 @@ const buildMyArea = (
 };
 
 const renderTableView = (game: Game, container: HTMLElement): void => {
+  if (game.winnerId !== undefined) {
+    const banner = document.createElement("div");
+    banner.classList.add("winner-banner");
+    banner.textContent =
+      game.winnerId === currentUserId ? "You win!" : `Player ${String(game.winnerId)} wins!`;
+    container.appendChild(banner);
+  }
+
   const topCard = game.discardPile?.[game.discardPile.length - 1] ?? "";
   const currentColor = game.currentColor ?? cardColorOf(topCard);
   const isMyTurn =
-    game.started === true && game.players[game.currentPlayerIndex ?? 0] === currentUserId;
+    game.started === true &&
+    game.winnerId === undefined &&
+    game.players[game.currentPlayerIndex ?? 0] === currentUserId;
 
   const errorDiv = document.createElement("div");
   errorDiv.classList.add("game-action-error");
