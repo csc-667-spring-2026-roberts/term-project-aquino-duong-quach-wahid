@@ -742,6 +742,14 @@ h2 {
   gap: 2.5rem;
 }
 
+.direction-indicator {
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--paper);
+  opacity: 0.72;
+  user-select: none;
+}
+
 .pile-count {
   position: relative;
   background: var(--paper);

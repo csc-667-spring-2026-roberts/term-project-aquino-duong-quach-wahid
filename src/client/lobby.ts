@@ -324,7 +324,12 @@ const buildCenter = (
   discard.classList.add("discard-top", `hand-card-${colorCode}`);
   discard.textContent = topCard ? cardLabel(topCard) : "—";
 
+  const dirIndicator = document.createElement("div");
+  dirIndicator.classList.add("direction-indicator");
+  dirIndicator.textContent = (game.direction ?? 1) === 1 ? "↻" : "↺";
+
   center.appendChild(drawPile);
+  center.appendChild(dirIndicator);
   center.appendChild(discard);
   table.appendChild(center);
 };
